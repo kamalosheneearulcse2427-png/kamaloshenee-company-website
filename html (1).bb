@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndiBreed - Cattle & Buffalo Recognition</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <header class="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i data-lucide="scan-eye" class="w-8 h-8 text-emerald-300"></i>
+                <h1 class="text-2xl font-bold tracking-tight">IndiBreed AI</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-sm font-medium">
+                <a href="#analyzer" class="hover:text-emerald-200 transition">Analyzer</a>
+                <a href="#database" class="hover:text-emerald-200 transition">Indian Breeds</a>
+                <a href="#about" class="hover:text-emerald-200 transition">About Project</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-12">
+
+        <section class="text-center py-6 bg-linear-to-r from-emerald-800 to-teal-700 rounded-2xl text-white shadow-lg px-4">
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-3">Indigenous Livestock Breed Identifier</h2>
+            <p class="text-emerald-100 max-w-xl mx-auto text-sm md:text-base">
+                An intelligent system trained to recognize major Indian indigenous Cattle (Cow) and Buffalo breeds from digital images to assist farmers and researchers.
+            </p>
+        </section>
+
+        <section id="analyzer" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            
+            <div class="bg-white p-6 rounded-xl shadow-xs border border-slate-200">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-emerald-800">
+                    <i data-lucide="upload-cloud" class="w-5 h-5"></i> Upload Image
+                </h3>
+                
+                <div id="dropzone" class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center min-h-[250px]">
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    <div id="uploadPrompt" class="space-y-3">
+                        <i data-lucide="image" class="w-12 h-12 text-slate-400 mx-auto"></i>
+                        <p class="font-medium text-slate-600 text-sm">Drag & drop your livestock image here, or <span class="text-emerald-600 underline">browse</span></p>
+                        <p class="text-xs text-slate-400">Supports JPG, PNG (Max 5MB)</p>
+                    </div>
+                    <img id="imagePreview" class="hidden max-h-64 rounded-md shadow-xs object-cover" alt="Livestock Preview">
+                </div>
+
+                <div class="mt-4 flex gap-3">
+                    <button id="clearBtn" class="flex-1 py-2.5 px-4 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 font-medium text-sm transition hidden">
+                        Clear
+                    </button>
+                    <button id="analyzeBtn" class="flex-2 bg-emerald-600 text-white py-2.5 px-4 rounded-lg font-semibold text-sm hover:bg-emerald-700 shadow-xs transition disabled:bg-slate-300 disabled:cursor-not-allowed" disabled>
+                        Analyze Image
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-xs border border-slate-200 min-h-[370px] flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-emerald-800">
+                        <i data-lucide="cpu" class="w-5 h-5"></i> Model Diagnostics & Results
+                    </h3>
+                    
+                    <div id="stateEmpty" class="text-center py-16 text-slate-400 space-y-2">
+                        <i data-lucide="circle-dashed" class="w-10 h-10 mx-auto animate-pulse"></i>
+                        <p class="text-sm">Please upload an image and click analyze to execute the deep learning model pipeline.</p>
+                    </div>
+
+                    <div id="stateLoading" class="hidden text-center py-16 space-y-4">
+                        <div class="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p class="text-sm font-medium text-slate-600">Running Computer Vision Feature Extraction...</p>
+                    </div>
+
+                    <div id="stateResults" class="hidden space-y-4">
+                        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p class="text-xs text-emerald-700 uppercase font-bold tracking-wider">Identified Breed</p>
+                                <p id="resultBreed" class="text-2xl font-black text-slate-800">Gir Cow</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-emerald-700 uppercase font-bold tracking-wider">Confidence Score</p>
+                                <p id="resultConfidence" class="text-2xl font-black text-emerald-600">94.8%</p>
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-100 rounded-lg divide-y divide-slate-100 text-sm">
+                            <div class="p-3 flex justify-between"><span class="text-slate-500">Classification Category:</span><span id="metaCategory" class="font-medium">Cattle (Bos indicus)</span></div>
+                            <div class="p-3 flex justify-between"><span class="text-slate-500">Origin / Native Region:</span><span id="metaOrigin" class="font-medium">Gujarat (Gir Forests)</span></div>
+                            <div class="p-3 flex justify-between"><span class="text-slate-500">Primary Utility Purpose:</span><span id="metaUtility" class="font-medium">Milch (High Milk Yield)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-400 border-t border-slate-100 pt-3 mt-4">
+                    Backend Status: <span class="text-emerald-600 font-semibold flex inline-items items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Mock Client-Side Mode</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="database" class="space-y-4">
+            <h3 class="text-2xl font-bold text-slate-800">Prominent Native Indian Breeds Support Matrix</h3>
+            <p class="text-slate-500 text-sm">Your model dataset typically includes classification weights for these vital native breeds:</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-2xs">
+                    <div class="h-32 bg-slate-200 rounded-md mb-2 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?auto=format&fit=crop&w=400&q=80')"></div>
+                    <h4 class="font-bold text-base">Gir (Cattle)</h4>
+                    <p class="text-xs text-slate-500">Distinct humped back, drooping ears, half-moon shaped horns. Native to Gujarat.</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-2xs">
+                    <div class="h-32 bg-slate-200 rounded-md mb-2 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1607406374368-809f8ec7f118?auto=format&fit=crop&w=400&q=80')"></div>
+                    <h4 class="font-bold text-base">Sahiwal (Cattle)</h4>
+                    <p class="text-xs text-slate-500">Reddish-dun coat color, loose skin (Lola). Renowned heavy milk producer.</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-2xs">
+                    <div class="h-32 bg-slate-200 rounded-md mb-2 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1545167622-3a6ac756afa4?auto=format&fit=crop&w=400&q=80')"></div>
+                    <h4 class="font-bold text-base">Murrah (Buffalo)</h4>
+                    <p class="text-xs text-slate-500">Jet black body with characteristic tightly curved spiral horns. Native to Haryana.</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-2xs">
+                    <div class="h-32 bg-slate-200 rounded-md mb-2 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1563548905-d143c7b3967d?auto=format&fit=crop&w=400&q=80')"></div>
+                    <h4 class="font-bold text-base">Jaffrabadi (Buffalo)</h4>
+                    <p class="text-xs text-slate-500">Massive frame, drooping horns curving upward. Heavy breed native to Gir forest.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="about" class="bg-slate-900 text-slate-400 mt-16 border-t border-slate-800 text-sm">
+        <div class="max-w-6xl mx-auto px-4 py-8 text-center space-y-2">
+            <p class="font-semibold text-white">Livestock Breed Recognition System Project Interface</p>
+            <p>Developed using modern HTML5 semantic elements, Tailwind Design Architecture, and Client-side JS Scripting.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide SVG Icons
+        lucide.createIcons();
+
+        // Get DOM Node Elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const imagePreview = document.getElementById('imagePreview');
+        const clearBtn = document.getElementById('clearBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        const stateEmpty = document.getElementById('stateEmpty');
+        const stateLoading = document.getElementById('stateLoading');
+        const stateResults = document.getElementById('stateResults');
+
+        const resultBreed = document.getElementById('resultBreed');
+        const resultConfidence = document.getElementById('resultConfidence');
+        const metaCategory = document.getElementById('metaCategory');
+        const metaOrigin = document.getElementById('metaOrigin');
+        const metaUtility = document.getElementById('metaUtility');
+
+        // Preset mock inferences to random select on frontend simulation
+        const mockBreedsDataset = [
+            { breed: "Gir", type: "Cattle (Bos indicus)", origin: "Gujarat (Saurashtra)", utility: "Milch Breed" },
+            { breed: "Sahiwal", type: "Cattle (Bos indicus)", origin: "Punjab / Rajasthan borders", utility: "High Milk Yield Milch" },
+            { breed: "Murrah", type: "Buffalo (Bubalus bubalis)", origin: "Haryana (Rohtak/Hisar)", utility: "Premium Dairy Purpose" },
+            { breed: "Surti", type: "Buffalo (Bubalus bubalis)", origin: "Gujarat (Baroda/Kaira)", utility: "High Nutritious Milk (8-12% Fat)" },
+            { breed: "Kangayam", type: "Cattle (Bos indicus)", origin: "Tamil Nadu", utility: "Excellent Draught/Work Breed" }
+        ];
+
+        // Trigger Click onto native hidden file selector when clicking the dropzone
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        // File Handler functions
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update UI view to contain preview
+                    uploadPrompt.classList.add('hidden');
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    // Enable utility button configurations
+                    clearBtn.classList.remove('hidden');
+                    analyzeBtn.removeAttribute('disabled');
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        // Reset UI functionality
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stop firing parent click handler
+            fileInput.value = "";
+            imagePreview.classList.add('hidden');
+            imagePreview.src = "";
+            uploadPrompt.classList.remove('hidden');
+            clearBtn.classList.add('hidden');
+            analyzeBtn.setAttribute('disabled', 'true');
+            
+            // Revert state panels
+            stateResults.classList.add('hidden');
+            stateLoading.classList.add('hidden');
+            stateEmpty.classList.remove('hidden');
+        });
+
+        // Simulating the Backend Machine Learning Model Request Pipeline
+        analyzeBtn.addEventListener('click', () => {
+            stateEmpty.classList.add('hidden');
+            stateResults.classList.add('hidden');
+            stateLoading.classList.remove('hidden');
+
+            // Simulate server network latency timer delay (1.8 seconds)
+            setTimeout(() => {
+                stateLoading.classList.add('hidden');
+                stateResults.classList.remove('hidden');
+
+                // Pick a random breed from mock registry data to simulate computer vision model performance
+                const structuralPrediction = mockBreedsDataset[Math.floor(Math.random() * mockBreedsDataset.length)];
+                const confidenceDecimalVal = (Math.random() * (98.5 - 84.0) + 84.0).toFixed(1);
+
+                // Inject text into output dashboard nodes
+                resultBreed.textContent = structuralPrediction.breed;
+                resultConfidence.textContent = `${confidenceDecimalVal}%`;
+                metaCategory.textContent = structuralPrediction.type;
+                metaOrigin.textContent = structuralPrediction.origin;
+                metaUtility.textContent = structuralPrediction.utility;
+
+            }, 1800);
+        });
+    </script>
+</body>
+</html>
